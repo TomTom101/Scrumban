@@ -1,0 +1,9 @@
+/* CSS declarations go here */
+#messages {
+	margin: 20px 0 0 0;
+
+}
+
+#controls > .btn-large {
+	width: 100px;
+}

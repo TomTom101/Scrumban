@@ -1,0 +1,68 @@
+<head>
+  <title>Scrumban</title>
+</head>
+
+<body>
+<div class="container">
+  {{> main}}
+  </div>
+</body>
+
+<template name="main">
+<div class="row">
+	<div class="span5">
+		<p class="lead">I am {{#if identifier}}logged in{{else}}<input type="text" id="identifier"/>{{/if}} 
+		{{#if current_state}}
+			and on <span class="label label-">{{current_state}}</span>
+		{{/if}}
+		</p>
+		<div id="controls" class="btn-group">
+			{{#each states}}
+			   {{> controls}}
+			{{/each}}
+		</div>
+	</div>
+	<div class="span5" id="messages"> 
+		{{> messages}}
+	</div>
+ </div>
+<div class="row">
+	<div class="span10" id="report"> 
+		{{> report}}
+	</div>
+ </div> 
+</template>
+
+<template name="controls">	
+	<button class="btn btn-large btn-{{class}}" id="{{name}}">{{name}}</button>
+</template>
+
+<template name="report">
+		<h4>Team</h4>
+		{{#with team}}
+			{{> progress}}		
+		{{/with}}
+		{{#if identifier}}
+		<h4>Personal {{identifier}}</h4>
+		{{#with personal}}
+			{{> progress}}		
+		{{/with}}	
+		{{/if}}
+</template>
+
+<template name="progress">
+	<div class="progress">
+	  <div class="bar bar-success" style="width: {{this.green}}%;"></div>
+	  <div class="bar bar-warning" style="width: {{this.yellow}}%;"></div>
+	  <div class="bar bar-danger" style="width: {{this.red}}%;"></div>
+	</div>	
+</template>
+
+<template name="messages">
+  {{#each messages}}
+   <blockquote>
+   <p>Someone changed state to {{state}}</p>
+   <small>{{created_at}}</small>
+   </blockquote>
+  {{/each}}
+</template>
