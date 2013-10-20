@@ -6,6 +6,10 @@ Meteor.publish("messages", function() {
         return Messages.find({});
 });
 
+Meteor.publish("messages-red", function() {
+        return Messages.find({state: 'red'});
+});
+
 Meteor.publish("reports", function() {
         return Report.find({});
 });
@@ -69,6 +73,8 @@ Meteor.methods({
 
 	},
 	log_action: function(state, insert_id, identifier ) {
+	
+		// If state = red, all other actions must be stopped!
 	
 		console.log('For ' + identifier);
 	

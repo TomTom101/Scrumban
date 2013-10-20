@@ -38,8 +38,12 @@
 	</div>
  </div>
 <div class="row">
-	<div class="span10" id="report"> 
-		{{> report}}
+	<div class="span10" id="report">
+		{{#if messages_red}}
+			<div class="alert alert-danger">Someone is on red!</div>
+		{{else}}
+			{{> report}}
+		{{/if}}
 	</div>
  </div> 
  <div class="row">

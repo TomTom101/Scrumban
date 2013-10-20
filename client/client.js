@@ -73,13 +73,16 @@ Template.main.helpers({
     },
     identifier: function () { 
     	return Meteor.user().services.google.id;
-    }
+    },
+    messages_red: function() {
+    	return Messages.find({state: 'red'}).fetch();
+    }  
 });
 
 Template.messages.helpers({
     messages: function() {
     	return Messages.find({}, {sort: {created_at: -1}, limit: 4}).fetch();
-    }  
+    }
 });
 
 
@@ -94,7 +97,7 @@ Template.report.helpers({
  	},
  	personal: function() {
  		try {
- 					return Scrumban.get_report(Meteor.user().services.google.id);
+ 			return Scrumban.get_report(Meteor.user().services.google.id);
 		} catch(e) {
 		}
  	}     	     
