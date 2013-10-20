@@ -1,16 +1,21 @@
 // client/client.js
 
 Deps.autorun(function(){
+	// could be all-but-mine messages
 	Meteor.subscribe("messages");
-	Meteor.subscribe("report");
+	// should be team-reports and personal-reports individually
+	Meteor.subscribe("reports");	
+	Meteor.subscribe("userData");
 });
 
-Template.main.events({
-	'click #controls > button': function (e, template) {
-		var state = e.currentTarget.id;
-		var identifier = Session.get('identifier');
+Scrumban.log_action = function(state) {
+	//might fail if not logged in on Meteor.user().services.google.id
+	// or undefined state
+	try {	
+		check(state, String);
+		var identifier = Meteor.user().services.google.id;
 		var insert_id = Session.get('insert_id');
-		
+	
 		Meteor.call("log_action", state, insert_id, identifier, function(error, insert_id) {
 			if(insert_id === null) {
 				state = undefined;
@@ -18,12 +23,44 @@ Template.main.events({
 			Session.set('current_state', state);
 			Session.set('insert_id', insert_id);
 		});
-	},
-	'change #identifier': function (e, template) {
-		Session.set('identifier', document.getElementById('identifier').value);
-		console.log('Indentifier changed to ' + Session.get('identifier'));
+	} catch(e) {
 	}
-    
+}
+
+Template.main.events({
+	'click #logout': function (e, template) {
+		Meteor.logout();
+	},
+	'click #controls > button': function (e, template) {
+		var state = e.currentTarget.id;
+		Scrumban.log_action(state);		
+	}    
+});
+
+Mousetrap.bind(['1', '2', '3'], function(e, key) {
+	var state;
+	switch(key) {
+		case '1':
+			state = 'green';
+			break;
+		case '2':
+			state = 'yellow';
+			break;
+		case '3':
+			state = 'red';
+			break;			
+	}
+	Scrumban.log_action(state);
+});
+
+Template.admin.events({
+	'click .admin-delete > button': function (e, template) {
+		var type = e.srcElement.id;
+		Meteor.call("admin_delete", type, function(error) {
+			console.log(type+' deleted!');
+			Session.set('current_state', undefined);
+		});	
+	}
 });
 
 
@@ -35,7 +72,7 @@ Template.main.helpers({
     	return Session.get('current_state');
     },
     identifier: function () { 
-    	return Session.get('identifier');
+    	return Meteor.user().services.google.id;
     }
 });
 
@@ -50,13 +87,16 @@ Template.messages.helpers({
 Template.report.helpers({
 	// no sharing/inheritance, copied from main.helpers
     identifier: function () { 
-    	return Session.get('identifier');
+    	return Meteor.user().services.google.id;
     },
     team: function() {
 		return Scrumban.get_report();
  	},
  	personal: function() {
-		return Scrumban.get_report(Session.get('identifier'));
+ 		try {
+ 					return Scrumban.get_report(Meteor.user().services.google.id);
+		} catch(e) {
+		}
  	}     	     
 });
 

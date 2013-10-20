@@ -11,18 +11,27 @@
 <template name="main">
 <div class="row">
 	<div class="span5">
-		<p class="lead">I am {{#if identifier}}logged in{{else}}<input type="text" id="identifier"/>{{/if}} 
+		<p class="lead">
+		{{#if currentUser}}
+		<div class="well">
+		I am {{currentUser.profile.name}} <button type="button" class="btn btn-small" id="logout" aria-hidden="true">Logout &times;</button>
+		and
 		{{#if current_state}}
-			and on <span class="label label-">{{current_state}}</span>
+			on <span class="label label-">{{current_state}}</span>
 		{{else}}
-			and idle.
+			idle.
 		{{/if}}
+		
 		</p>
 		<div id="controls" class="btn-group">
 			{{#each states}}
 			   {{> controls}}
 			{{/each}}
 		</div>
+		</div>
+		{{else}}
+			{{loginButtons}}
+		{{/if}}
 	</div>
 	<div class="span5" id="messages"> 
 		{{> messages}}
@@ -33,10 +42,24 @@
 		{{> report}}
 	</div>
  </div> 
+ <div class="row">
+	<div class="span10" id="admin">
+	{{#if currentUser}}
+		{{> admin}}
+	{{/if}}
+	</div>
+ </div> 
 </template>
 
 <template name="controls">	
 	<button class="btn btn-large btn-{{class}}" id="{{name}}">{{name}}</button>
+</template>
+
+<template name="admin">	
+<div class="btn-group admin-delete">
+	<button class="btn btn-danger" id="admin-del-report">Delete all reports</button>
+	<button class="btn btn-danger" id="admin-del-messages">Delete all activity</button>
+</div>
 </template>
 
 <template name="report">
@@ -44,8 +67,8 @@
 		{{#with team}}
 			{{> progress}}		
 		{{/with}}
-		{{#if identifier}}
-		<h4>Personal {{identifier}}</h4>
+		{{#if currentUser}}
+		<h4>Personal {{currentUser.services.google.name}}</h4>
 		{{#with personal}}
 			{{> progress}}		
 		{{/with}}	
