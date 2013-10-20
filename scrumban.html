@@ -14,6 +14,8 @@
 		<p class="lead">I am {{#if identifier}}logged in{{else}}<input type="text" id="identifier"/>{{/if}} 
 		{{#if current_state}}
 			and on <span class="label label-">{{current_state}}</span>
+		{{else}}
+			and idle.
 		{{/if}}
 		</p>
 		<div id="controls" class="btn-group">
@@ -51,10 +53,10 @@
 </template>
 
 <template name="progress">
-	<div class="progress">
-	  <div class="bar bar-success" style="width: {{this.green}}%;"></div>
-	  <div class="bar bar-warning" style="width: {{this.yellow}}%;"></div>
-	  <div class="bar bar-danger" style="width: {{this.red}}%;"></div>
+	<div class="progress progress-striped">
+	  <div class="bar bar-success {{progress_on 'green'}}" style="width: {{this.green}}%;"></div>
+	  <div class="bar bar-warning {{progress_on 'yellow'}}" style="width: {{this.yellow}}%;"></div>
+	  <div class="bar bar-danger {{progress_on 'red'}}" style="width: {{this.red}}%;"></div>
 	</div>	
 </template>
 

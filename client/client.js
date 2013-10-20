@@ -11,13 +11,17 @@ Template.main.events({
 		var identifier = Session.get('identifier');
 		var insert_id = Session.get('insert_id');
 		
-		Meteor.call("log_action", insert_id, state, identifier, function(error, insert_id) {
+		Meteor.call("log_action", state, insert_id, identifier, function(error, insert_id) {
+			if(insert_id === null) {
+				state = undefined;
+			}
 			Session.set('current_state', state);
 			Session.set('insert_id', insert_id);
 		});
 	},
 	'change #identifier': function (e, template) {
 		Session.set('identifier', document.getElementById('identifier').value);
+		console.log('Indentifier changed to ' + Session.get('identifier'));
 	}
     
 });
@@ -49,11 +53,15 @@ Template.report.helpers({
     	return Session.get('identifier');
     },
     team: function() {
-		console.log('team');
 		return Scrumban.get_report();
  	},
  	personal: function() {
-	 	console.log('personal');
 		return Scrumban.get_report(Session.get('identifier'));
  	}     	     
+});
+
+Handlebars.registerHelper('progress_on', function(state) {
+	if(state == Session.get('current_state')) {
+		return 'progress-striped';
+	}
 });

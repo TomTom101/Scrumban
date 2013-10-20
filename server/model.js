@@ -25,8 +25,28 @@ Meteor.methods({
 		);		
 	},
 	update_report: function() {
-		console.log("update_report");
-		//find message created < now - x
+		console.log("Updating report");
+
+		var now = Math.round(new Date().getTime() / 1000)
+		var time_spent;
+
+		Messages.find().forEach(function(doc) {
+			time_spent = now - doc.created_at;
+			console.log(doc);
+			Meteor.call("save_to_report", time_spent, doc.state, doc.identifier, function() {
+					Messages.update(
+						{
+							_id: doc._id
+						},
+						{ $set: {
+								created_at: now
+								}
+						}
+					);
+					console.log('Saved to server ' + time_spent);
+			});
+		});
+		
 		/*
 			foreach 
 				calc now - created = time
@@ -35,46 +55,49 @@ Meteor.methods({
 				)
 		*/
 	},
-	log_action: function(insert_id, state, identifier ) {
+	log_action: function(state, insert_id, identifier ) {
+	
+		console.log('For ' + identifier);
 	
 		var now = Math.round(new Date().getTime() / 1000);
-
+		
+		// Did the user create an action before and supplied the previous _id?
 		if(insert_id) {
+			console.log('Id is ' + insert_id);
+		
 			var lastEntry = Messages.findOne({_id: insert_id});
 			
+			// found an entry for it
 			if(lastEntry) {
-				if (lastEntry.state == state) {
-					return;
-				}
-				
 				var time_spent = now - lastEntry.created_at;
-
-				if (time_spent < 1) {
-					// only update state w/ the new one, leaving creation date the same
-					var upd = Messages.update(lastEntry._id,
-						{
-							$set:
-							{state: state}
-						});
-					console.log('updated');
-					return;
-					
-				} else {
-					
-				
-					//update anstatt remove
+							
+				Meteor.call("save_to_report", time_spent, lastEntry.state, identifier, function() {
 					Messages.remove(lastEntry._id);
-					Meteor.call("save_to_report", time_spent, lastEntry.state, identifier, function() {
-						console.log('Saved to server ' + time_spent);
-					});
-				}
-			}		
+					console.log('Action ' + lastEntry._id + ' removed' );
+					console.log('Saved to server ' + time_spent);
+				});
+				
+				// If the same button is clicked again, we stop the action
+				if (lastEntry.state == state) {					
+					console.log('Action ' + state + ' stopped' );
+					return null;
+				} else {
+					// unset insert_id so a new action record gets inserted
+					insert_id = null;
+				}				
+			}
 		}
+			
+		if(insert_id === null) {
+			console.log('Create new action record');
 	
-		return Messages.insert({
+			return Messages.insert({
 				created_at: now,
 				state:      state,
 				identifier:  identifier
-		});	
-	}	
+			});	
+		}
+		
+		return 0;		
+	}
 });
