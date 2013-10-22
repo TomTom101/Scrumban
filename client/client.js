@@ -1,5 +1,7 @@
 // client/client.js
 
+//http://0xfe.muthanna.com/notifyme.html
+
 Deps.autorun(function(){
 	// could be all-but-mine messages
 	Meteor.subscribe("messages");
@@ -75,7 +77,14 @@ Template.main.helpers({
     	return Meteor.user().services.google.id;
     },
     messages_red: function() {
-    	return Messages.find({state: 'red'}).fetch();
+    	var red = Messages.find({state: 'red'}).fetch();
+    	if(red.length > 0) {
+    	
+			if (!notifier.Notify("", "We have a problem", "Someone is having an issue!")) {
+				notifier.RequestPermission();
+			}
+		}
+    	return red;
     }  
 });
 
