@@ -19,12 +19,12 @@ Meteor.methods({
 			}					
 		);		
 	},
-	update_messages: function(insert_id, state, identifier ) {
+	update_activities: function(insert_id, state, identifier ) {
 	
 		var now = Math.round(new Date().getTime() / 1000);
 
 		if(insert_id) {
-			var lastEntry = Messages.findOne({_id: insert_id});
+			var lastEntry = Activities.findOne({_id: insert_id});
 			
 			if(lastEntry) {
 				if (lastEntry.state == state) {
@@ -35,7 +35,7 @@ Meteor.methods({
 
 				if (time_spent < 1) {
 					// only update state w/ the new one, leaving creation date the same
-					var upd = Messages.update(lastEntry._id,
+					var upd = Activities.update(lastEntry._id,
 						{
 							$set:
 							{state: state}
@@ -47,7 +47,7 @@ Meteor.methods({
 					
 				
 					//update anstatt remove
-					Messages.remove(lastEntry._id);
+					Activities.remove(lastEntry._id);
 					Meteor.call("save_to_report", time_spent, lastEntry.state, identifier, function() {
 						console.log('Saved to server ' + time_spent);
 					});
@@ -55,7 +55,7 @@ Meteor.methods({
 			}		
 		}
 	
-		return Messages.insert({
+		return Activities.insert({
 				created_at: now,
 				state:      state,
 				identifier:  identifier

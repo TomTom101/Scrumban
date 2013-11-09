@@ -25,6 +25,12 @@ Scrumban.log_action = function(state) {
 	}
 }
 
+Meteor.startup(function() {
+	Meteor.call("get_sprint_report", function(error, report) {
+		Session.set('serverDataResponse',  report);
+	});	
+});
+
 Template.main.events({
 	'click #logout': function (e, template) {
 		Meteor.logout();

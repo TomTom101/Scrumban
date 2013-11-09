@@ -29,6 +29,9 @@ Meteor.setInterval(function() {
 }, Scrumban.update_report_interval);
 
 Meteor.methods({
+	get_sprint_report: function() {
+		return JSON.parse(Assets.getText("sprintreport.json"));
+	},
 	admin_delete: function(type) {
 		switch (type) {
 			case 'admin-del-activities':
