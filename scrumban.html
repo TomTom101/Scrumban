@@ -14,10 +14,10 @@
 		<p class="lead">
 		{{#if currentUser}}
 		<div class="well">
-		I am {{currentUser.profile.name}} <button type="button" class="btn btn-small" id="logout" aria-hidden="true">Logout &times;</button>
+		I am  <button type="button" class="btn btn-small" id="logout" aria-hidden="true">{{currentUser.profile.name}} &times;</button>
 		and
 		{{#if current_state}}
-			on <span class="label label-">{{current_state}}</span>
+			on <span class="label label-{{class_for current_state}}">{{current_state}}</span>
 		{{else}}
 			idle.
 		{{/if}}
@@ -33,13 +33,13 @@
 			{{loginButtons}}
 		{{/if}}
 	</div>
-	<div class="span5" id="messages"> 
-		{{> messages}}
+	<div class="span5" id="activities"> 
+		{{> activities}}
 	</div>
  </div>
 <div class="row">
 	<div class="span10" id="report">
-		{{#if messages_red}}
+		{{#if activities_red}}
 			<div class="alert alert-danger">Someone is on red!</div>
 		{{else}}
 			{{> report}}
@@ -56,13 +56,13 @@
 </template>
 
 <template name="controls">	
-	<button class="btn btn-large btn-{{class}}" id="{{name}}">{{name}}</button>
+	<button class="btn btn-large btn-{{btn_class}}" id="{{name}}">{{name}}</button>
 </template>
 
 <template name="admin">	
 <div class="btn-group admin-delete">
 	<button class="btn btn-danger" id="admin-del-report">Delete all reports</button>
-	<button class="btn btn-danger" id="admin-del-messages">Delete all activity</button>
+	<button class="btn btn-danger" id="admin-del-activities">Delete all activity</button>
 </div>
 </template>
 
@@ -87,8 +87,8 @@
 	</div>	
 </template>
 
-<template name="messages">
-  {{#each messages}}
+<template name="activities">
+  {{#each activities}}
    <blockquote>
    <p>Someone changed state to {{state}}</p>
    <small>{{created_at}}</small>

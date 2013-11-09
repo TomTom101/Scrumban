@@ -1,22 +1,20 @@
 // client/client.js
 
 Deps.autorun(function(){
-	// could be all-but-mine messages
-	Meteor.subscribe("messages");
+	Meteor.subscribe("activities-others");
 	// should be team-reports and personal-reports individually
 	Meteor.subscribe("reports");	
 	Meteor.subscribe("userData");
 });
+
 
 Scrumban.log_action = function(state) {
 	//might fail if not logged in on Meteor.user().services.google.id
 	// or undefined state
 	try {	
 		check(state, String);
-		var identifier = Meteor.user().services.google.id;
 		var insert_id = Session.get('insert_id');
-	
-		Meteor.call("log_action", state, insert_id, identifier, function(error, insert_id) {
+		Meteor.call("log_action", state, Meteor.userId(), function(error, insert_id) {
 			if(insert_id === null) {
 				state = undefined;
 			}
@@ -74,14 +72,21 @@ Template.main.helpers({
     identifier: function () { 
     	return Meteor.user().services.google.id;
     },
-    messages_red: function() {
-    	return Messages.find({state: 'red'}).fetch();
-    }  
+    activities_red: function() {
+    	return Activities.find({state: 'red'}).fetch();
+    },
+    sprint_report: function() {
+	    return Session.get('serverDataResponse') || "";
+    }
 });
 
-Template.messages.helpers({
-    messages: function() {
-    	return Messages.find({}, {sort: {created_at: -1}, limit: 4}).fetch();
+Template.activities.helpers({
+    activities: function() {
+    	var activities =  Activities.find({}, {sort: {created_at: -1}, limit: 4}).fetch();
+    	_.map(activities || [], function(activity) {
+    		return activity.created_at = moment(activity.created_at).fromNow();
+    	});
+    	return activities;
     }
 });
 
@@ -90,14 +95,14 @@ Template.messages.helpers({
 Template.report.helpers({
 	// no sharing/inheritance, copied from main.helpers
     identifier: function () { 
-    	return Meteor.user().services.google.id;
+    	return this.userId;
     },
     team: function() {
 		return Scrumban.get_report();
  	},
  	personal: function() {
  		try {
- 			return Scrumban.get_report(Meteor.user().services.google.id);
+ 			return Scrumban.get_report(this.userId);
 		} catch(e) {
 		}
  	}     	     
@@ -107,4 +112,9 @@ Handlebars.registerHelper('progress_on', function(state) {
 	if(state == Session.get('current_state')) {
 		return 'progress-striped';
 	}
+});
+
+Handlebars.registerHelper('class_for', function(state) {
+	var obj = _.find(Scrumban.states, function(s){ return state == s.name; });
+	return obj.lbl_class;
 });
