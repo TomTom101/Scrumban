@@ -11,35 +11,34 @@
 <template name="main">
 <div class="row">
 	<div class="span5">
-		<p class="lead">
+
 		{{#if currentUser}}
-		<div class="well">
-		I am {{currentUser.profile.name}} <button type="button" class="btn btn-small" id="logout" aria-hidden="true">Logout &times;</button>
+		
+		<h3>I am  <button type="button" class="btn btn-small" id="logout" aria-hidden="true">{{currentUser.profile.name}} &times;</button>
 		and
 		{{#if current_state}}
-			on <span class="label label-">{{current_state}}</span>
+			on <span class="label label-{{class_for current_state}}">{{current_state}}</span>
 		{{else}}
 			idle.
 		{{/if}}
-		
-		</p>
-		<div id="controls" class="btn-group">
+		</h3>
+		<div id="controls" class="btn-group btn-group-lg" data-toggle="buttons">
 			{{#each states}}
 			   {{> controls}}
 			{{/each}}
 		</div>
-		</div>
+
 		{{else}}
 			{{loginButtons}}
 		{{/if}}
 	</div>
-	<div class="span5" id="messages"> 
-		{{> messages}}
+	<div class="span5" id="activities"> 
+		{{> activities}}
 	</div>
  </div>
 <div class="row">
 	<div class="span10" id="report">
-		{{#if messages_red}}
+		{{#if activities_red}}
 			<div class="alert alert-danger">Someone is on red!</div>
 		{{else}}
 			{{> report}}
@@ -56,13 +55,13 @@
 </template>
 
 <template name="controls">	
-	<button class="btn btn-large btn-{{class}}" id="{{name}}">{{name}}</button>
+	<button type="button" class="btn btn-{{btn_class}}" id="{{name}}">{{name}}</button>
 </template>
 
 <template name="admin">	
 <div class="btn-group admin-delete">
 	<button class="btn btn-danger" id="admin-del-report">Delete all reports</button>
-	<button class="btn btn-danger" id="admin-del-messages">Delete all activity</button>
+	<button class="btn btn-danger" id="admin-del-activities">Delete all activity</button>
 </div>
 </template>
 
@@ -81,14 +80,14 @@
 
 <template name="progress">
 	<div class="progress">
-	  <div class="bar bar-success {{progress_on 'green'}}" style="width: {{this.green}}%;"></div>
-	  <div class="bar bar-warning {{progress_on 'yellow'}}" style="width: {{this.yellow}}%;"></div>
-	  <div class="bar bar-danger {{progress_on 'red'}}" style="width: {{this.red}}%;"></div>
+	  <div class="progress-bar progress-bar-success {{progress_on 'green'}}" style="width: {{this.green}}%;"></div>
+	  <div class="progress-bar progress-bar-warning {{progress_on 'yellow'}}" style="width: {{this.yellow}}%;"></div>
+	  <div class="progress-bar progress-bar-danger {{progress_on 'red'}}" style="width: {{this.red}}%;"></div>
 	</div>	
 </template>
 
-<template name="messages">
-  {{#each messages}}
+<template name="activities">
+  {{#each activities}}
    <blockquote>
    <p>Someone changed state to {{state}}</p>
    <small>{{created_at}}</small>

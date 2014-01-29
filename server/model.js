@@ -2,12 +2,17 @@
 
 //db.report.group({ key: {state: 1}, initial: {total: 0}, reduce: function(curr, result) { result.total += curr.time; } })
 
-Meteor.publish("messages", function() {
-        return Messages.find({});
+
+Meteor.publish("activities", function() {
+        return Activities.find({});
 });
 
-Meteor.publish("messages-red", function() {
-        return Messages.find({state: 'red'});
+Meteor.publish("activities-others", function() {
+        return Activities.find({ identifier: { $ne: this.userId } } );
+});
+
+Meteor.publish("activities-red", function() {
+        return Activities.find({state: 'red'});
 });
 
 Meteor.publish("reports", function() {
@@ -26,8 +31,8 @@ Meteor.setInterval(function() {
 Meteor.methods({
 	admin_delete: function(type) {
 		switch (type) {
-			case 'admin-del-messages':
-				Messages.remove({});
+			case 'admin-del-activities':
+				Activities.remove({});
 				break;
 			case 'admin-del-report':
 				Report.remove({});
@@ -36,6 +41,7 @@ Meteor.methods({
 	
 	},
 	save_to_report: function(time, state, identifier) {
+		// must be a day, no time
 		var today = new Date(moment().format('MMM D, YYYY'));
 		return Report.update(
 			{
@@ -52,13 +58,14 @@ Meteor.methods({
 		);		
 	},
 	update_report: function() {
-		var now = Math.round(new Date().getTime() / 1000)
+		var now = new Date();
 		var time_spent;
 
-		Messages.find({}, {sort: {state: 1}}).forEach(function(doc) {
-			time_spent = now - doc.created_at;
+		Activities.find({}, {sort: {state: 1}}).forEach(function(doc) {
+			//@todo use new last_saved instead to leave created date untouched
+			time_spent = Math.round((now - doc.created_at)/1000);
 			Meteor.call("save_to_report", time_spent, doc.state, doc.identifier, function() {
-					Messages.update(
+					Activities.update(
 						{
 							_id: doc._id
 						},
@@ -72,26 +79,28 @@ Meteor.methods({
 		});
 
 	},
-	log_action: function(state, insert_id, identifier ) {
+	log_action: function(state, identifier ) {
 	
 		// If state = red, all other actions must be stopped!
+		// update_report
+		// remove all state!=red
 	
 		console.log('For ' + identifier);
 	
-		var now = Math.round(new Date().getTime() / 1000);
+//		var now = Math.round(new Date().getTime() / 1000);
+		var now = new Date();
 		
 		// Did the user create an action before and supplied the previous _id?
 		if(identifier) {
-			console.log('Id is ' + identifier);
 		
-			var lastEntry = Messages.findOne({identifier: identifier});
+			var lastEntry = Activities.findOne({identifier: identifier});
 			
 			// found an entry for it
 			if(lastEntry) {
-				var time_spent = now - lastEntry.created_at;
+				var time_spent = Math.round((now - lastEntry.created_at)/1000);
 							
 				Meteor.call("save_to_report", time_spent, lastEntry.state, identifier, function() {
-					Messages.remove(lastEntry._id);
+					Activities.remove(lastEntry._id);
 					console.log('Action ' + lastEntry._id + ' removed' );
 					console.log('Saved to server ' + time_spent);
 				});
@@ -106,7 +115,7 @@ Meteor.methods({
 			
 			console.log('Create new action record');
 	
-			return Messages.insert({
+			return Activities.insert({
 				created_at: now,
 				state:      state,
 				identifier:  identifier
